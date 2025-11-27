@@ -5,6 +5,7 @@ import { AnimationManager } from './managers/AnimationManager';
 import { VisualEffectsManager } from './managers/VisualEffectsManager';
 import { StateManager } from './managers/StateManager';
 import { UIManager } from './managers/UIManager';
+import { ChartManager } from './managers/ChartManager';
 import { PREDEFINED_PATTERNS } from './constants';
 
 export class BreathingApp {
@@ -13,6 +14,7 @@ export class BreathingApp {
   private animationManager: AnimationManager;
   private visualEffectsManager: VisualEffectsManager;
   private stateManager: StateManager;
+  private chartManager: ChartManager;
   private currentPattern: BreathingPattern;
   private holdTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -27,9 +29,15 @@ export class BreathingApp {
     const circle = this.uiManager.getElementById('breathing-circle');
     const circleGlow = this.uiManager.getElementById('circle-glow');
     const circleRipple = this.uiManager.getElementById('circle-ripple');
+    const chartCanvas = this.uiManager.getElementById('breathing-chart') as HTMLCanvasElement;
+    
+    if (!chartCanvas) {
+      console.warn('Chart canvas not found');
+    }
     
     this.animationManager = new AnimationManager(circle);
     this.visualEffectsManager = new VisualEffectsManager(circle, circleGlow, circleRipple);
+    this.chartManager = new ChartManager(chartCanvas);
     
     this.attachEventListeners();
   }
@@ -132,6 +140,10 @@ export class BreathingApp {
     // Keep current scale during hold phase - get it from the actual element state
     const holdScale = this.animationManager.getCurrentScale();
     
+    // Update chart for hold phase - use current Y position
+    const currentY = this.chartManager.getCurrentY();
+    this.chartManager.startPhase(cycle.phase, cycle.duration, currentY);
+    
     // Update visuals with ripple effect for phase change
     // Don't trigger ripple on every update, only on phase change
     this.visualEffectsManager.updateCircleVisuals(cycle.phase, holdScale, true);
@@ -156,6 +168,10 @@ export class BreathingApp {
     // Get the actual current scale from the element - this ensures accuracy
     // especially when transitioning from hold phase
     const startScale = this.animationManager.getCurrentScale();
+    
+    // Update chart for animated phase - use current Y position
+    const currentY = this.chartManager.getCurrentY();
+    this.chartManager.startPhase(cycle.phase, cycle.duration, currentY);
     
     // Update visuals to match the starting scale BEFORE starting animation
     // This prevents flickering by ensuring visuals match the animation start point
@@ -197,6 +213,7 @@ export class BreathingApp {
 
     this.stateManager.pause();
     this.audioManager.stopSound();
+    this.chartManager.pause();
     
     const cycle = this.stateManager.getCurrentCycle();
     if (!cycle) return;
@@ -217,6 +234,8 @@ export class BreathingApp {
       const elapsed = (Date.now() - this.stateManager.getHoldStartTime()) / 1000;
       const remaining = Math.max(0, cycle.duration - elapsed);
       this.stateManager.setRemainingTime(remaining);
+      // Stop the UI countdown interval
+      this.uiManager.clearCountdown();
     }
   }
 
@@ -225,6 +244,8 @@ export class BreathingApp {
     const progress = this.animationManager.getProgress();
     const remaining = cycle.duration * (1 - progress);
     this.stateManager.setRemainingTime(remaining);
+    // Stop the UI countdown interval
+    this.uiManager.clearCountdown();
   }
 
   private resume(): void {
@@ -236,18 +257,35 @@ export class BreathingApp {
     const cycle = this.stateManager.getCurrentCycle();
     if (!cycle) return;
 
+    // Resume chart - use current Y position
+    const currentY = this.chartManager.getCurrentY();
+    this.chartManager.startPhase(cycle.phase, this.stateManager.getRemainingTime(), currentY);
+    this.chartManager.resume();
+
     // For animated phases, resume the animation
     if (cycle.phase !== 'hold' && cycle.phase !== 'holdAfterExhale') {
+      const remainingTime = this.stateManager.getRemainingTime();
+      // Restart the UI countdown display
+      this.uiManager.updatePhaseDisplay(cycle.phase, cycle.duration, remainingTime, (remaining) => {
+        this.stateManager.setRemainingTime(remaining);
+      });
+      
       this.animationManager.resume();
       // Restart audio for the remaining duration
-      const remainingDuration = this.stateManager.getRemainingTime() * 1000;
+      const remainingDuration = remainingTime * 1000;
       if (remainingDuration > 0) {
         this.audioManager.playSound(cycle.phase, remainingDuration);
       }
     } else {
-      // For hold phases, restart the timeout
-      const remainingDuration = this.stateManager.getRemainingTime() * 1000;
-      if (remainingDuration > 0) {
+      // For hold phases, restart the timeout and UI countdown
+      const remainingTime = this.stateManager.getRemainingTime();
+      if (remainingTime > 0) {
+        // Restart the UI countdown display
+        this.uiManager.updatePhaseDisplay(cycle.phase, cycle.duration, remainingTime, (remaining) => {
+          this.stateManager.setRemainingTime(remaining);
+        });
+        
+        const remainingDuration = remainingTime * 1000;
         this.audioManager.playSound(cycle.phase, remainingDuration);
         this.stateManager.setHoldStartTime(Date.now());
         this.holdTimeout = setTimeout(() => {
@@ -266,6 +304,7 @@ export class BreathingApp {
     this.audioManager.stopSound();
     this.clearTimers();
     this.animationManager.stop();
+    this.chartManager.stop();
     this.animationManager.reset(() => {
       this.stateManager.setCurrentScale(1);
     });
@@ -273,6 +312,7 @@ export class BreathingApp {
     this.uiManager.showStartButton();
     this.uiManager.resetDisplay();
   }
+
 
   private clearTimers(): void {
     if (this.holdTimeout) {

@@ -39,6 +39,7 @@ export class UIManager {
         </div>
 
         <div class="animation-container">
+          <canvas id="breathing-chart" class="breathing-chart"></canvas>
           <div class="circle-ripple" id="circle-ripple"></div>
           <div class="breathing-circle" id="breathing-circle">
             <div class="circle-glow" id="circle-glow"></div>
