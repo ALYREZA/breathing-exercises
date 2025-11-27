@@ -4,6 +4,7 @@ export interface BreathingPattern {
   name: string;
   pattern: number[];
   description: string;
+  benefit?: string;
 }
 
 export interface BreathingCycle {

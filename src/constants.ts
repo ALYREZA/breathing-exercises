@@ -4,22 +4,74 @@ export const PREDEFINED_PATTERNS: BreathingPattern[] = [
   {
     name: 'Box Breathing',
     pattern: [4, 4, 4, 4],
-    description: 'Inhale-Hold-Exhale-Hold (4-4-4-4)'
+    description: 'Inhale-Hold-Exhale-Hold (4-4-4-4)',
+    benefit: 'Great for stress relief and improving focus and concentration'
   },
   {
     name: '4-7-8 Breathing',
     pattern: [4, 7, 8, 0],
-    description: 'Inhale-Hold-Exhale (4-7-8)'
+    description: 'Inhale-Hold-Exhale (4-7-8)',
+    benefit: 'Excellent for falling asleep faster and reducing anxiety'
   },
   {
     name: 'Equal Breathing',
     pattern: [4, 0, 4, 0],
-    description: 'Inhale-Exhale (4-4)'
+    description: 'Inhale-Exhale (4-4)',
+    benefit: 'Perfect for beginners and maintaining calm throughout the day'
   },
   {
     name: 'Deep Breathing',
     pattern: [6, 2, 6, 2],
-    description: 'Inhale-Hold-Exhale-Hold (6-2-6-2)'
+    description: 'Inhale-Hold-Exhale-Hold (6-2-6-2)',
+    benefit: 'Ideal for increasing lung capacity and promoting relaxation'
+  },
+  {
+    name: 'Triangle Breathing',
+    pattern: [4, 4, 4, 0],
+    description: 'Inhale-Hold-Exhale (4-4-4)',
+    benefit: 'Helps with grounding and emotional balance'
+  },
+  {
+    name: 'Coherent Breathing',
+    pattern: [5, 0, 5, 0],
+    description: 'Inhale-Exhale (5-5)',
+    benefit: 'Promotes heart rate variability and overall well-being'
+  },
+  {
+    name: 'Lion\'s Breath',
+    pattern: [3, 0, 5, 0],
+    description: 'Inhale-Exhale (3-5)',
+    benefit: 'Releases tension in face and chest, energizes the body'
+  },
+  {
+    name: 'Alternate Nostril',
+    pattern: [4, 4, 4, 4],
+    description: 'Inhale-Hold-Exhale-Hold (4-4-4-4)',
+    benefit: 'Balances left and right brain hemispheres, enhances clarity'
+  },
+  {
+    name: 'Belly Breathing',
+    pattern: [4, 0, 6, 0],
+    description: 'Inhale-Exhale (4-6)',
+    benefit: 'Strengthens diaphragm and reduces shallow breathing'
+  },
+  {
+    name: 'Power Breathing',
+    pattern: [2, 0, 2, 0],
+    description: 'Inhale-Exhale (2-2)',
+    benefit: 'Increases energy and alertness, great for morning routines'
+  },
+  {
+    name: 'Relaxing Breath',
+    pattern: [4, 0, 8, 0],
+    description: 'Inhale-Exhale (4-8)',
+    benefit: 'Activates parasympathetic nervous system for deep relaxation'
+  },
+  {
+    name: 'Ocean Breath',
+    pattern: [5, 0, 5, 0],
+    description: 'Inhale-Exhale (5-5)',
+    benefit: 'Creates calming sound effect, reduces stress and anxiety'
   }
 ];
 

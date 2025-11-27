@@ -33,9 +33,10 @@ export class UIManager {
             id="pattern-input" 
             class="pattern-input" 
             placeholder="4-4-4"
-            pattern="[0-9-]+"
+            pattern="^([0-9]+-){1,3}[0-9]+$"
           />
           <small>Format: inhale-hold-exhale-holdAfterExhale (use 0 to skip a phase)</small>
+          <div class="pattern-error" id="pattern-error" style="display: none;"></div>
         </div>
 
         <div class="animation-container">
@@ -59,6 +60,7 @@ export class UIManager {
 
         <div class="pattern-info" id="pattern-info">
           <p>Current Pattern: <strong>${currentPattern.description}</strong></p>
+          ${currentPattern.benefit ? `<p class="pattern-benefit">${currentPattern.benefit}</p>` : ''}
         </div>
 
         <div class="sound-control">
@@ -81,7 +83,10 @@ export class UIManager {
   updatePatternInfo(pattern: BreathingPattern): void {
     const patternInfo = this.getElementById('pattern-info');
     if (patternInfo) {
-      patternInfo.innerHTML = `<p>Current Pattern: <strong>${pattern.description}</strong></p>`;
+      patternInfo.innerHTML = `
+        <p>Current Pattern: <strong>${pattern.description}</strong></p>
+        ${pattern.benefit ? `<p class="pattern-benefit">${pattern.benefit}</p>` : ''}
+      `;
     }
   }
 
@@ -162,6 +167,76 @@ export class UIManager {
     if (button) {
       button.style.display = visible ? 'inline-block' : 'none';
     }
+  }
+
+  showPatternError(message: string): void {
+    const errorElement = this.getElementById('pattern-error');
+    const inputElement = this.getElementById('pattern-input') as HTMLInputElement;
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+    if (inputElement) {
+      inputElement.classList.add('pattern-input-error');
+    }
+  }
+
+  clearPatternError(): void {
+    const errorElement = this.getElementById('pattern-error');
+    const inputElement = this.getElementById('pattern-input') as HTMLInputElement;
+    if (errorElement) {
+      errorElement.style.display = 'none';
+      errorElement.textContent = '';
+    }
+    if (inputElement) {
+      inputElement.classList.remove('pattern-input-error');
+    }
+  }
+
+  validatePatternInput(input: string): { isValid: boolean; error?: string } {
+    // Check if input is empty
+    if (!input.trim()) {
+      return { isValid: false, error: 'Please enter a pattern' };
+    }
+
+    // Regex validation: 2-4 numbers separated by hyphens
+    // Format: number-number or number-number-number or number-number-number-number
+    const patternRegex = /^([0-9]+-){1,3}[0-9]+$/;
+    if (!patternRegex.test(input.trim())) {
+      return { 
+        isValid: false, 
+        error: 'Invalid format. Use numbers separated by hyphens (e.g., 4-4-4 or 4-7-8)' 
+      };
+    }
+
+    // Parse and validate the numbers
+    const parts = input.split('-').map(p => parseInt(p.trim()));
+    
+    // Check for invalid numbers (NaN, negative, or too large)
+    if (parts.some(p => isNaN(p) || p < 0)) {
+      return { 
+        isValid: false, 
+        error: 'All values must be non-negative numbers' 
+      };
+    }
+
+    // Check length (2-4 parts)
+    if (parts.length < 2 || parts.length > 4) {
+      return { 
+        isValid: false, 
+        error: 'Pattern must have 2-4 values separated by hyphens' 
+      };
+    }
+
+    // Check that at least one value is greater than 0
+    if (parts.every(p => p === 0)) {
+      return { 
+        isValid: false, 
+        error: 'At least one phase duration must be greater than 0' 
+      };
+    }
+
+    return { isValid: true };
   }
 }
 

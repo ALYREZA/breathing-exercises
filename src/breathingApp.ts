@@ -58,16 +58,34 @@ export class BreathingApp {
         customPatternDiv.style.display = 'block';
       } else {
         customPatternDiv.style.display = 'none';
+        this.uiManager.clearPatternError();
+        if (patternInput) {
+          patternInput.value = '';
+        }
         this.currentPattern = PatternManager.getPredefinedPattern(parseInt(value));
         this.uiManager.updatePatternInfo(this.currentPattern);
       }
     });
 
     patternInput?.addEventListener('input', () => {
-      const pattern = PatternManager.parsePattern(patternInput.value);
-      if (pattern) {
-        this.currentPattern = PatternManager.createCustomPattern(pattern);
-        this.uiManager.updatePatternInfo(this.currentPattern);
+      const validation = this.uiManager.validatePatternInput(patternInput.value);
+      
+      if (validation.isValid) {
+        this.uiManager.clearPatternError();
+        const pattern = PatternManager.parsePattern(patternInput.value);
+        if (pattern) {
+          this.currentPattern = PatternManager.createCustomPattern(pattern);
+          this.uiManager.updatePatternInfo(this.currentPattern);
+        }
+      } else {
+        this.uiManager.showPatternError(validation.error || 'Invalid pattern');
+      }
+    });
+
+    patternInput?.addEventListener('blur', () => {
+      const validation = this.uiManager.validatePatternInput(patternInput.value);
+      if (!validation.isValid && patternInput.value.trim()) {
+        this.uiManager.showPatternError(validation.error || 'Invalid pattern');
       }
     });
 
