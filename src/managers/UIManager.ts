@@ -90,7 +90,7 @@ export class UIManager {
     }
   }
 
-  updatePhaseDisplay(phase: BreathingPhase, duration: number, startFrom: number, onTick?: (remaining: number) => void): void {
+  updatePhaseDisplay(phase: BreathingPhase, _duration: number, startFrom: number, onTick?: (remaining: number) => void): void {
     this.clearCountdown();
 
     if (this.phaseText) {

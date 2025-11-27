@@ -12,7 +12,6 @@ export class ChartManager {
   private startY: number = 0;
   private targetY: number = 0;
   private isPaused: boolean = false;
-  private lastUpdateTime: number = 0;
 
   constructor(canvas: HTMLCanvasElement | null) {
     this.canvas = canvas;
@@ -152,7 +151,6 @@ export class ChartManager {
       this.animationFrameId = requestAnimationFrame(animate);
     };
 
-    this.lastUpdateTime = Date.now();
     this.animationFrameId = requestAnimationFrame(animate);
   }
 
@@ -196,8 +194,6 @@ export class ChartManager {
         y: point.y
       }));
     }
-
-    this.lastUpdateTime = now;
   }
 
   private draw(): void {
